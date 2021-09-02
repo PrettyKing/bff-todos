@@ -2,13 +2,13 @@ import Koa from 'koa';
 import serve from 'koa-static';
 import log4js from 'log4js';
 import koaBody from 'koa-body';
-import config from './config/index'
 import path from 'path'
-import IndexController from './controller/IndexController'
 import koaSession from "koa-session"
-
-
+import mongoose from "mongoose"
 const app = new Koa();
+import config from './config/index'
+import PostsController from './controller/PostsController'
+
 app.keys = ['bfftodos'];
 const CONFIG = {
     key: 'bfftodos',   //cookie key (default is koa:sess)
@@ -19,7 +19,6 @@ const CONFIG = {
     rolling: false,  //在每次请求时强行设置cookie，这将重置cookie过期时间（默认：false）
     renew: false,  //(boolean) renew session when session is nearly expired,
 };
-
 app.use(koaSession(CONFIG, app));
 app.use(koaBody());
 // 错误日志记录
@@ -37,21 +36,17 @@ log4js.configure({
         }
     }
 });
-
-// 异常处理
-// const logger = log4js.getLogger('globallog');
-// ErrorHander.init(app, logger);
-
-
 // 初始化路由
-IndexController.init(app);
-
-
-
-
+PostsController.init(app);
 // 静态资源目录
 app.use(serve(path.resolve(__dirname, "./web")));
 
-module.exports = app.listen(config.port, function () {
-    console.log(`server is running at : http://localhost:${config.port}`);
-});
+const CONNECTION_URL= `mongodb://${config.mongodb_user}:${config.mongodb_password}@${config.mongodb_host}:${config.mongodb_port}/${config.mongodb_database}?authSource=${config.mongodb_auth}`
+
+mongoose.connect(CONNECTION_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => app.listen(config.port, () => console.log(`Server Running on Port: http://localhost:${config.port}`)))
+  .catch((error) => console.log(`数据库连接失败，${error} `));
+
+mongoose.set('useFindAndModify', false);
+
+module.exports = app

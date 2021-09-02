@@ -7,14 +7,14 @@ const devWebpackConfig = {
     devServer: {
         historyApiFallback: true,
         proxy: {
-            // '/api': {
-            //     target: 'https://api.faithcal.com/admin',
-            //     changeOrigin: true,
-            //     secure: true,
-            //     pathRewrite: {
-            //         '^/api': '/'
-            //     }
-            // },
+            '/api': {
+                target: 'http://localhost:7001/api',
+                changeOrigin: true,
+                secure: true,
+                pathRewrite: {
+                    '^/api': '/'
+                }
+            },
             // '/default': {
             //     target: 'https://api.faithcal.com/default',
             //     changeOrigin: true,
